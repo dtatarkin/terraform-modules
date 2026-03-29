@@ -7,6 +7,8 @@ resource "yandex_compute_instance" "server" {
   platform_id = each.value.platform_id
   zone        = each.value.zone
 
+  allow_stopping_for_update = true
+
   resources {
     cores         = each.value.cores
     core_fraction = each.value.core_fraction
