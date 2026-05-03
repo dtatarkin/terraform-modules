@@ -27,6 +27,7 @@ resource "yandex_compute_instance" "server" {
     subnet_id          = each.value.subnet_id
     security_group_ids = each.value.security_group_ids
     nat                = true #checkov:skip=CKV_YC_2:Public IP is required for VPS
+    nat_ip_address     = each.value.nat_ip_address
   }
 
   metadata = {

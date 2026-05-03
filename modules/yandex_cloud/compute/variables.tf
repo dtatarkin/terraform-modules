@@ -19,6 +19,7 @@ variable "servers" {
     security_group_ids = optional(list(string), [])
     docker_host        = optional(bool, false)
     k3s_role           = optional(string)
+    nat_ip_address     = optional(string)
   }))
   default = {}
 }
