@@ -1,0 +1,6 @@
+[default.extend-words]
+# Hetzner's Helsinki location code, inside `hel1`.
+hel = "hel"
+# Yandex Cloud's IAM role id `kms.keys.encrypterDecrypter`, a string the API
+# reads verbatim.
+encrypter = "encrypter"

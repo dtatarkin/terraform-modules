@@ -75,3 +75,13 @@ module "dns" {
     web = { name = "www", type = "A", ttl = 300, data = [module.compute.server_ips["web1"]] }
   }
 }
+
+module "storage" {
+  source = "../../modules/yandex_cloud/storage"
+
+  folder_id = "your-folder-id"
+
+  buckets = {
+    assets = {}
+  }
+}

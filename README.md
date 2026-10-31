@@ -4,7 +4,8 @@
 [![OpenTofu](https://img.shields.io/badge/OpenTofu-%3E%3D1.6-yellow?logo=opentofu)](https://opentofu.org/)
 [![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.6-purple?logo=terraform)](https://www.terraform.io/)
 
-Production-ready, reusable OpenTofu/Terraform modules for provisioning cloud infrastructure on **Hetzner Cloud** and **Yandex Cloud**.
+Production-ready, reusable OpenTofu/Terraform modules for provisioning cloud infrastructure on
+**Hetzner Cloud** and **Yandex Cloud**.
 
 ---
 
@@ -111,7 +112,7 @@ module "dns" {
 
 ## Project Structure
 
-```
+```text
 shared-modules/
 ├── modules/
 │   ├── hetzner/

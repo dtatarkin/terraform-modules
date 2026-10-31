@@ -1,0 +1,110 @@
+# Derived from the house lint standard by this repository's own signals:
+# baseline (always), markup (YAML, TOML, markdown) and infrastructure (*.tf).
+# format-justfile and nixfmt are inert: no justfile or nix file is tracked.
+# No lockfile is tracked, so nothing is pinned here and every local hook runs
+# by name. On a machine where a tool is missing the hook has produced no
+# finding: it is an environment failure, and the commit waits.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: debug-statements
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.51.1
+    hooks:
+      - id: typos
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: [--strict]
+
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: v0.3.0
+    hooks:
+      - id: rumdl-check
+        args: [--fix]
+
+  - repo: local
+    hooks:
+      - id: format-justfile
+        name: format justfile
+        entry: bash -c 'for f in "$@"; do just --fmt --unstable --justfile "$f"; done' --
+        language: system
+        files: (^|/)justfile$|\.just$
+
+      - id: nixfmt
+        name: nixfmt
+        entry: nixfmt
+        language: system
+        files: \.nix$
+
+      - id: terraform-fmt
+        name: terraform fmt
+        entry: terraform fmt -recursive modules examples
+        language: system
+        files: ^(modules|examples)/.*\.tf$
+        pass_filenames: false
+
+      # The two example roots call all seven modules. Each needs initialising
+      # before this gate, which is network work and so not a hook's:
+      #   terraform -chdir=examples/hetzner init -backend=false
+      #   terraform -chdir=examples/yandex_cloud init -backend=false
+      - id: terraform-validate
+        name: terraform validate
+        entry: >-
+          bash -c 'rc=0; for d in "$@"; do echo "$d:";
+          terraform -chdir="$d" validate || rc=1; done; exit $rc'
+          -- examples/hetzner examples/yandex_cloud
+        language: system
+        files: ^(modules|examples)/.*\.tf$
+        pass_filenames: false
+
+      - id: tflint
+        name: tflint
+        entry: tflint --chdir . --recursive
+        language: system
+        files: ^(modules|examples)/.*\.tf$
+        pass_filenames: false
+
+      - id: checkov
+        name: checkov
+        entry: checkov --quiet --directory .
+        language: system
+        files: ^(modules|examples)/
+        pass_filenames: false
+
+      - id: trivy-config
+        name: trivy config
+        entry: trivy config --exit-code 1 --severity HIGH,CRITICAL .
+        language: system
+        files: ^(modules|examples)/
+        pass_filenames: false
