@@ -1,9 +1,11 @@
 # Derived from the house lint standard by this repository's own signals:
 # baseline (always), markup (YAML, TOML, markdown) and infrastructure (*.tf).
 # format-justfile and nixfmt are inert: no justfile or nix file is tracked.
-# No lockfile is tracked, so nothing is pinned here and every local hook runs
-# by name. On a machine where a tool is missing the hook has produced no
-# finding: it is an environment failure, and the commit waits.
+# No lockfile is tracked. checkov is a hosted hook, installed by the hook
+# runner at its own `rev:`, so it never comes from a virtual environment above
+# this repository. terraform, tflint and trivy are local hooks called by name,
+# from the toolchain above. On a machine where one of them is missing the hook
+# has produced no finding: it is an environment failure, and the commit waits.
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -53,6 +55,16 @@ repos:
       - id: rumdl-check
         args: [--fix]
 
+  # The entry is the house command and the path filter the project's, in place
+  # of upstream's, which differ from both.
+  - repo: https://github.com/bridgecrewio/checkov
+    rev: 3.4.3
+    hooks:
+      - id: checkov
+        entry: checkov --quiet --directory .
+        files: ^(modules|examples)/
+        pass_filenames: false
+
   - repo: local
     hooks:
       - id: format-justfile
@@ -93,13 +105,6 @@ repos:
         entry: tflint --chdir . --recursive
         language: system
         files: ^(modules|examples)/.*\.tf$
-        pass_filenames: false
-
-      - id: checkov
-        name: checkov
-        entry: checkov --quiet --directory .
-        language: system
-        files: ^(modules|examples)/
         pass_filenames: false
 
       - id: trivy-config
